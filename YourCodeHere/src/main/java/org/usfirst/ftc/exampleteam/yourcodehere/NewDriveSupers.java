@@ -85,15 +85,17 @@ public class NewDriveSupers extends OpMode {
         motorLeftBack.setDirection(DcMotor.Direction.REVERSE);
         motorextensionLeft.setDirection(DcMotor.Direction.REVERSE);
 
-        hook1.setPosition(hookPosition);
+        hook1.setPosition(.493);
 
         climberHitterServo.setPosition(.493);
 
         ramp.setPosition(.3);
 
-        climbers.setPosition(.493);
+        climbers.setPosition(climbersPosition);
 
     }
+
+    double climbersPosition = 0;
 
     /*
      * This method will be called repeatedly in a loop
@@ -164,7 +166,7 @@ public class NewDriveSupers extends OpMode {
             motorextensionRight.setPower(extensionPower);
             // }
         }
-        else if(!gamepad2.x && !gamepad2.y && !gamepad2.a && !gamepad2.b){
+        else {
             motorextensionLeft.setPower(0);
             motorextensionRight.setPower(0);
         }
@@ -178,12 +180,17 @@ public class NewDriveSupers extends OpMode {
 
         //climber dumper
         if(gamepad1.dpad_down){
-            climbers.setPosition(.25);
+            climbersPosition -= .01;
+            climbersPosition = scaleServo(climbersPosition);
+            climbers.setPosition(climbersPosition);
         } else if(gamepad1.dpad_up){
-            climbers.setPosition(.75);
-        } else {
-            climbers.setPosition(.493);
+            climbersPosition += .01;
+            climbersPosition = scaleServo(climbersPosition);
+            climbers.setPosition(climbersPosition);
         }
+
+        telemetry.addData("climber_position", climbersPosition);
+
 
         //pull up
         if(gamepad2.dpad_right){
@@ -244,39 +251,16 @@ public class NewDriveSupers extends OpMode {
 
 
 
-        //entension singles
-        if(gamepad2.x){
-            motorextensionLeft.setPower(.5);
-            motorextensionRight.setPower(0);
-        }
-        if(gamepad2.y){
-            motorextensionLeft.setPower(-.5);
-            motorextensionRight.setPower(0);
-        }
-
-        if(gamepad2.a){
-            motorextensionRight.setPower(.5);
-            motorextensionLeft.setPower(0);
-        }
-        if(gamepad2.b){
-            motorextensionRight.setPower(-.5);
-            motorextensionLeft.setPower(0);
-        }
-
         //hooks
         if(Math.abs(gamepad1.right_trigger) > 0.2) {
-            hookPosition += .02;
-            hookPosition = scaleServo(hookPosition);
-
-            hook1.setPosition(hookPosition);
+            hook1.setPosition(.7);
 
         } else if(Math.abs(gamepad1.left_trigger) > 0.2) {
-            hookPosition -= .02;
-            hookPosition = scaleServo(hookPosition);
-
-            hook1.setPosition(hookPosition);
+            hook1.setPosition(.3);
+        } else {
+            hook1.setPosition(.493);
         }
-        telemetry.addData("hook position", hookPosition);
+
 
 
         //climberHitterServo
