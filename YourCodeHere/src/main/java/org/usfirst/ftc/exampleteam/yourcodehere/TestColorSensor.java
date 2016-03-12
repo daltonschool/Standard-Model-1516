@@ -16,9 +16,9 @@ public class TestColorSensor extends SynchronousOpMode {
 
         waitForStart();
 
-        AdafruitI2cColorSensor colorSensor = new AdafruitI2cColorSensor(boooop);
+     //   AdafruitI2cColorSensor colorSensor = new AdafruitI2cColorSensor(boooop);
 
-        AdaFruitTCS34725ColorSensor.create(this, colorSensor);
+       // AdaFruitTCS34725ColorSensor.create(this, colorSensor);
 
     }
 

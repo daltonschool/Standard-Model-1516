@@ -1,9 +1,10 @@
 package org.usfirst.ftc.exampleteam.yourcodehere;
 
+
 /**
- * Created by student on 9/25/15.
+ * Created by friends in a safe place!
  */
-import android.drm.DrmStore;
+
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -15,7 +16,12 @@ import com.qualcomm.robotcore.util.Range;
  * <p>
  * Enables control of the robot via the gamepad
  */
-public class NewDrive extends OpMode {
+public class NewDriveSupers extends OpMode {
+
+    final double antiJerkVal = 1.2; //if this is still too jerky, decrease the the value
+
+    //if it stops too slowly, increase
+    //value must be >1 to ensure stop
 
     DcMotor motorLeftFront;
     DcMotor motorLeftBack;
@@ -34,8 +40,11 @@ public class NewDrive extends OpMode {
     Servo box;
     Servo aiming;
     Servo hook1;
-    Servo hook2;
+    Servo climberHitterServo;
     Servo ramp;
+    Servo climbers;
+
+    double climberHitterPosition = .3;
 
     /*
      * Code to run when the op mode is first enabled goes here
@@ -63,8 +72,10 @@ public class NewDrive extends OpMode {
         //climbers = hardwareMap.servo.get("servo_1");
 
 
+        climbers = hardwareMap.servo.get("servo_1");
+
         aiming = hardwareMap.servo.get("servo_2");
-        hook2 = hardwareMap.servo.get("servo_3");
+        climberHitterServo = hardwareMap.servo.get("servo_3");
         hook1 = hardwareMap.servo.get("servo_4");
         box = hardwareMap.servo.get("servo_5");
         ramp = hardwareMap.servo.get("servo_6");
@@ -73,9 +84,14 @@ public class NewDrive extends OpMode {
         motorLeftFront.setDirection(DcMotor.Direction.REVERSE);
         motorLeftBack.setDirection(DcMotor.Direction.REVERSE);
         motorextensionLeft.setDirection(DcMotor.Direction.REVERSE);
-        hook1.setPosition(.8);
-        hook2.setPosition(.8);
 
+        hook1.setPosition(hookPosition);
+
+        climberHitterServo.setPosition(.493);
+
+        ramp.setPosition(.3);
+
+        climbers.setPosition(.493);
 
     }
 
@@ -87,9 +103,12 @@ public class NewDrive extends OpMode {
     //double servoPosition = 0;
     double aimPosition = 0.5;
     double hookPosition = 0;
-    double rampPosition = 0;
+    double rampPosition = .4;
+
     @Override
     public void loop() {
+        if((gamepad1.start && gamepad1.a) || (gamepad2.start && gamepad2.b)) //avoid start-a start-b movement bug
+            return;
 
         encextleft = motorextensionLeft.getCurrentPosition();
         encextright = motorextensionRight.getCurrentPosition();
@@ -134,16 +153,16 @@ public class NewDrive extends OpMode {
             motorLeftBack.setPower(frontPower);
         }
 
-    //code for the extension
+        //code for the extension
         if (Math.abs(gamepad2.left_stick_y)>=.2){
 //            if(extensionPower<0 && (encextleft<(-3100) || encextright<(-3100))){
 //            }
 //            else if (extensionPower>0 && (encextleft>(-200)||encextright>(-200))){
 //            }
-           // else{
-                motorextensionLeft.setPower(extensionPower);
-                motorextensionRight.setPower(extensionPower);
-           // }
+            // else{
+            motorextensionLeft.setPower(extensionPower);
+            motorextensionRight.setPower(extensionPower);
+            // }
         }
         else if(!gamepad2.x && !gamepad2.y && !gamepad2.a && !gamepad2.b){
             motorextensionLeft.setPower(0);
@@ -157,27 +176,50 @@ public class NewDrive extends OpMode {
             motorNom.setPower(0);
         }
 
+        //climber dumper
+        if(gamepad1.dpad_down){
+            climbers.setPosition(.25);
+        } else if(gamepad1.dpad_up){
+            climbers.setPosition(.75);
+        } else {
+            climbers.setPosition(.493);
+        }
+
         //pull up
         if(gamepad2.dpad_right){
-            motorPullUp.setPower(.8);
+            motorPullUp.setPower(1);
         }
         else if(gamepad2.dpad_left){
-            motorPullUp.setPower(-.8);
+            motorPullUp.setPower(-1);
         }
         else{
             motorPullUp.setPower(0);
         }
 
 
-        // update the position of the arm.
-        if (gamepad1.a) {
-            // if the A button is pushed on gamepad1, increment the position of
-            // the arm servo.
-            //armPosition += armDelta;
-        }
+//        // update the position of the arm.
+//        if (gamepad1.a) {
+//            // if the A button is pushed on gamepad1, increment the position of
+//            // the arm servo.
+//            //armPosition += armDelta;
+//        }
 
         if (gamepad1.y) {
+
+
             // if the Y button is pushed on gamepad1, decrease the position of
+            double rfp = motorRightFront.getPower();
+            double rbp = motorRightBack.getPower();
+
+            double lfp = motorLeftFront.getPower();
+            double lbp = motorLeftBack.getPower();
+
+            rfp /= antiJerkVal;
+            rbp /= antiJerkVal;
+
+            lfp /= antiJerkVal;
+            lbp /= antiJerkVal;
+
             motorRightFront.setPower(0);
             motorRightBack.setPower(0);
             motorLeftBack.setPower(0);
@@ -185,19 +227,21 @@ public class NewDrive extends OpMode {
         }
 
         //code for the box
-        if(gamepad1.left_trigger <= 1 && gamepad1.left_trigger >= 0 && gamepad1.right_trigger <= 1 && gamepad1.right_trigger >= 0) {
-            if (gamepad1.left_trigger > 0.25) {
-                box.setPosition(0.5 - gamepad1.left_trigger / 2);
+        if(gamepad2.left_trigger <= 1 && gamepad2.left_trigger >= 0 && gamepad2.right_trigger <= 1 && gamepad2.right_trigger >= 0) {
+            if (gamepad2.left_trigger > 0.25) {
+                box.setPosition(0.5 + gamepad2.left_trigger / 2);
             }
-            if (gamepad1.right_trigger > 0.25) {
-                box.setPosition(0.5 + gamepad1.right_trigger / 2);
+            if (gamepad2.right_trigger > 0.25) {
+                box.setPosition(0.5 - gamepad2.right_trigger / 2);
             }
-            if (gamepad1.right_trigger < 0.25 && gamepad1.left_trigger < 0.25) {
+            if (gamepad2.right_trigger < 0.25 && gamepad2.left_trigger < 0.25) {
                 box.setPosition(0.493);
             }
         } else {
             box.setPosition(0.493);
+
         }
+
 
 
         //entension singles
@@ -220,14 +264,33 @@ public class NewDrive extends OpMode {
         }
 
         //hooks
-        if(Math.abs(gamepad2.right_trigger) > 0.2) {
-            hook1.setPosition(0.5 + gamepad2.right_trigger/2);
-            hook2.setPosition(0.5 - gamepad2.right_trigger/2);
-        } else if(Math.abs(gamepad2.left_trigger) > 0.2) {
-            hook1.setPosition(0.5 - gamepad2.left_trigger/2);
-            hook2.setPosition(0.5 + gamepad2.left_trigger/2);
-        } else {
+        if(Math.abs(gamepad1.right_trigger) > 0.2) {
+            hookPosition += .02;
+            hookPosition = scaleServo(hookPosition);
+
+            hook1.setPosition(hookPosition);
+
+        } else if(Math.abs(gamepad1.left_trigger) > 0.2) {
+            hookPosition -= .02;
+            hookPosition = scaleServo(hookPosition);
+
+            hook1.setPosition(hookPosition);
         }
+        telemetry.addData("hook position", hookPosition);
+
+
+        //climberHitterServo
+
+        if(gamepad1.a == true) {
+            climberHitterServo.setPosition(.3);
+        } else if(gamepad1.b == true) {
+            climberHitterServo.setPosition(.7);
+        } else {
+            climberHitterServo.setPosition(.493);
+        }
+
+        telemetry.addData("climber hitter", climberHitterPosition);
+
 
 //aim the pull up
         if(gamepad2.dpad_down) {
@@ -245,14 +308,14 @@ public class NewDrive extends OpMode {
 
 
 //ramp
-        if(gamepad2.left_bumper) {
-            if(rampPosition + 0.01 <= 1) {
+        if(gamepad2.right_bumper) {
+            if(rampPosition + 0.01 <= .9) {
                 rampPosition += 0.01;
             }
             ramp.setPosition(rampPosition);
         }
-        if(gamepad2.right_bumper) {
-            if(rampPosition - 0.01 >= 0) {
+        if(gamepad2.left_bumper) {
+            if(rampPosition - 0.01 >= .34) {
                 rampPosition -= 0.01;
             }
             ramp.setPosition(rampPosition);
@@ -277,8 +340,9 @@ public class NewDrive extends OpMode {
 		 * will return a null value. The legacy NXT-compatible motor controllers
 		 * are currently write only.
 		 */
-        telemetry.addData("extension right", encextleft);
+        telemetry.addData("servo ramp", rampPosition);
         telemetry.addData("extension left", encextright);
+        telemetry.addData("extension right", encextleft);
     }
 
     /*
@@ -289,6 +353,15 @@ public class NewDrive extends OpMode {
     @Override
     public void stop() {
 
+    }
+
+    double scaleServo(double val) {
+        if(val > 1) {
+            val = 1;
+        }
+        if(val < 0)
+            val = 0;
+        return val;
     }
 
     /*
