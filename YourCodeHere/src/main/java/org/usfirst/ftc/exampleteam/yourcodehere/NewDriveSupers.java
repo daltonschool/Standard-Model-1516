@@ -265,9 +265,9 @@ public class NewDriveSupers extends OpMode {
 
         //climberHitterServo
 
-        if(gamepad1.a == true) {
+        if(gamepad2.a == true) {
             climberHitterServo.setPosition(.3);
-        } else if(gamepad1.b == true) {
+        } else if(gamepad2.b == true) {
             climberHitterServo.setPosition(.7);
         } else {
             climberHitterServo.setPosition(.493);
