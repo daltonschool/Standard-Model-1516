@@ -236,19 +236,11 @@ public class NewDriveSupers extends OpMode {
         }
 
         //code for the box
-        if(gamepad2.left_trigger <= 1 && gamepad2.left_trigger >= 0 && gamepad2.right_trigger <= 1 && gamepad2.right_trigger >= 0) {
-            if (gamepad2.left_trigger > 0.25) {
-                box.setPosition(0.5 + gamepad2.left_trigger / 2);
-            }
-            if (gamepad2.right_trigger > 0.25) {
-                box.setPosition(0.5 - gamepad2.right_trigger / 2);
-            }
-            if (gamepad2.right_trigger < 0.25 && gamepad2.left_trigger < 0.25) {
-                box.setPosition(0.493);
-            }
-        } else {
-            box.setPosition(0.493);
-
+        if (Math.abs(gamepad2.left_stick_x) > .2) {
+            box.setPosition(scaleServo(0.493 + -gamepad2.left_stick_x));
+        }
+        else {
+            box.setPosition(.493);
         }
 
 
