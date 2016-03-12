@@ -172,8 +172,10 @@ public class NewDriveSupers extends OpMode {
         }
 
         //power to the nom
-        if(Math.abs(gamepad2.right_stick_y)>=.2) {
+        if(gamepad2.right_trigger == 1) {
             motorNom.setPower(nomPower);
+        } else if(gamepad2.left_trigger == 1) {
+            motorNom.setPower(-nomPower);
         } else {
             motorNom.setPower(0);
         }
